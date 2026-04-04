@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
-import urllib.parse
+from db import get_db_engine
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -9,12 +9,7 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 
 class WildfireModelTrainer:
     def __init__(self):
-        # Database setup
-        username = 'sa'
-        password = urllib.parse.quote_plus('eKyhH>"UGj]W=bqT|t,VMF?<Qj"%ow£YS[;=!|i]GTjR_GqIpG')
-        server = 'localhost'
-        database = 'master'
-        self.engine = create_engine(f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server")
+        self.engine = get_db_engine()
         self.df = None
 
     def load_data(self):

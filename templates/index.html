@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildfire AI Pipeline Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>Wildfire AI Engine</h1>
+                <p class="subtitle">Live Tactical Emergency Briefings</p>
+            </div>
+            <div class="header-right">
+                <button id="randomize-btn" class="btn-outline">
+                    Randomize Data
+                </button>
+                <div id="loading-indicator" class="loading-indicator" style="display: none; margin-left: 10px;">
+                    Processing...
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="dashboard-grid">
+                <div class="telemetry-panel panel">
+                    <div class="feed-header">
+                        <h2>Sensor Telemetry</h2>
+                    </div>
+                    <form id="sensor-form" class="sensor-form">
+                        <div class="form-group grid-2">
+                            <div>
+                                <label>Latitude</label>
+                                <input type="number" id="lat" step="0.0001" value="38.0000">
+                            </div>
+                            <div>
+                                <label>Longitude</label>
+                                <input type="number" id="lon" step="0.0001" value="-120.0000">
+                            </div>
+                        </div>
+
+                        <div class="form-group grid-2">
+                            <div>
+                                <label>Temp (°C)</label>
+                                <input type="number" id="temp_c" step="0.1" value="35.0">
+                            </div>
+                            <div>
+                                <label>Humidity (%)</label>
+                                <input type="number" id="humidity_pct" step="0.1" value="15.0">
+                            </div>
+                        </div>
+
+                        <div class="form-group grid-2">
+                            <div>
+                                <label>Wind (Km/h)</label>
+                                <input type="number" id="wind_kmh" step="0.1" value="45.0">
+                            </div>
+                            <div>
+                                <label>Precipitation (mm)</label>
+                                <input type="number" id="precip_mm" step="0.1" value="0.0">
+                            </div>
+                        </div>
+
+                        <div class="form-group grid-2">
+                            <div>
+                                <label>Lightning Strike (kA)</label>
+                                <input type="number" id="lightning_ka" step="0.1" value="0.0">
+                            </div>
+                            <div>
+                                <label>Soil Moisture (%)</label>
+                                <input type="number" id="soil_moisture" step="0.1" value="20.0">
+                            </div>
+                        </div>
+
+                        <div class="form-group grid-2">
+                            <div>
+                                <label>Slope (%)</label>
+                                <input type="number" id="slope_pct" step="0.1" value="15.0">
+                            </div>
+                            <div>
+                                <label>AQI Level</label>
+                                <input type="number" id="aqi_level" value="40">
+                            </div>
+                        </div>
+
+                        <div class="form-group grid-2">
+                            <div>
+                                <label>Fire Ignited?</label>
+                                <select id="fire_ignited">
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Fire Size (HA)</label>
+                                <input type="number" id="fire_size" step="0.1" value="0.0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Primary Fuel Type</label>
+                            <select id="fuel_type">
+                                <option value="0" title="Chaparral">Type 0 (Chaparral)</option>
+                                <option value="1" title="Grassland">Type 1 (Grassland)</option>
+                                <option value="2" title="Mixed Hardwood">Type 2 (Mixed Hardwood)</option>
+                                <option value="3" title="Pine Forest">Type 3 (Pine Forest)</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="feed-container panel">
+                    <div class="feed-header">
+                        <h2>Incident Feed</h2>
+                        <div class="feed-controls">
+                            <label for="sort-feed">Sort By:</label>
+                            <select id="sort-feed">
+                                <option value="critical">Severity (Critical First)</option>
+                                <option value="good">Severity (Good First)</option>
+                                <option value="aza">Alphabetical (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="feed-legend">
+                        <span class="legend-item"><span class="legend-dot bg-success"></span> Nominal (Good)</span>
+                        <span class="legend-item"><span class="legend-dot bg-info"></span> Info</span>
+                        <span class="legend-item"><span class="legend-dot bg-warning"></span> Warning</span>
+                        <span class="legend-item"><span class="legend-dot bg-critical"></span> Critical Action</span>
+                    </div>
+
+                    <div id="briefing-list" class="briefing-list">
+                        <!-- Briefing cards generated by JS will go here -->
+                        <div class="empty-state">
+                            <p>No active incidents.</p>
+                            <p class="dim">Adjust telemetry to query AI Models.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Dictionary Table -->
+            <div class="data-dictionary-panel panel" style="margin-top: 2rem;">
+                <h2>System Data Dictionary</h2>
+                <p class="subtitle" style="margin-bottom: 1rem;">The variables tracked by the system. <span class="highlight-feature">Highlighted rows</span> are physically used as feature inputs for AI predictions.</p>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Description</th>
+                            <th>Data Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Date</td><td>Timestamp of the simulated daily log</td><td>Datetime</td></tr>
+                        <tr><td>Latitude</td><td>GPS Latitude coordinate</td><td>Float</td></tr>
+                        <tr><td>Longitude</td><td>GPS Longitude coordinate</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Fuel_Type</td><td>Primary vegetation (Pine Forest, Grassland, etc.)</td><td>String</td></tr>
+                        <tr class="is-feature"><td>Slope_Pct</td><td>Topographical incline percentage</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Soil_Moisture_Pct</td><td>Ground moisture baseline percentage</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Temp_C</td><td>Ambient temperature in Celsius</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Humidity_Pct</td><td>Relative atmospheric humidity percentage</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Wind_Kmh</td><td>Wind speed in kilometers per hour</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Precipitation_mm</td><td>Rainfall volume in millimeters</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Lightning_Strike_kA</td><td>Intensity of a recorded lightning strike in kiloamps</td><td>Float</td></tr>
+                        <tr class="is-feature"><td>Fire_Ignited</td><td>Binary trigger (1 = yes, 0 = no) indicating if a fire started</td><td>Integer</td></tr>
+                        <tr><td>Fire_Classification</td><td>Categorical severity size (Output Target)</td><td>String</td></tr>
+                        <tr class="is-feature"><td>Fire_Size_Hectares</td><td>Final burned area size in hectares</td><td>Float</td></tr>
+                        <tr><td>Days_to_Contain</td><td>Estimated days until fire containment (Output Target)</td><td>Integer</td></tr>
+                        <tr><td>Is_False_Alarm</td><td>Binary trigger indicating a false smoke report (Output Target)</td><td>Integer</td></tr>
+                        <tr class="is-feature"><td>AQI_Level</td><td>Local Air Quality Index reading (Also Output Target)</td><td>Integer</td></tr>
+                        <tr><td>Evac_Triggered</td><td>Binary trigger indicating an evacuation order (Output Target)</td><td>Integer</td></tr>
+                        <tr><td>Road_Closure_Flag</td><td>Binary trigger for backcountry road closure (Output Target)</td><td>Integer</td></tr>
+                        <tr><td>Landslide_Risk_Flag</td><td>Trigger for post-fire slope collapse risk (Output Target)</td><td>Integer</td></tr>
+                        <tr><td>Dispatch_Air_Tanker</td><td>Trigger for preemptive aerial dispatch (Output Target)</td><td>Integer</td></tr>
+                        <tr><td>Powerline_Risk_Flag</td><td>Trigger for vegetation interference on the grid (Output Target)</td><td>Integer</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+    
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

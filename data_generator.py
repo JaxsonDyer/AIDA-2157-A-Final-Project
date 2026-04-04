@@ -3,7 +3,8 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 import urllib.parse
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
+from db import get_db_engine
 
 def _generate_synthetic_dataframe(num_rows):
     """Internal helper function to generate the flattened ML dataset."""
@@ -103,23 +104,8 @@ def generate_data(rows=10000, overwrite=True):
     """
     table_name = "Wildfire_ML_Training_Data"
     
-    # --- Database Configuration ---
-    # Assuming the docker container's port 1433 is mapped to your localhost. 
-    # If executing this script from *inside* another docker container on the same network, 
-    # change 'localhost' to 'aida2157a-SQL-pgnaawmszydfuzabwixtlmbnainwxztt'
-    server = 'localhost' 
-    database = 'master' # Default MS-SQL database. Change if you created a specific one.
-    username = 'sa'
-    raw_password = 'eKyhH>"UGj]W=bqT|t,VMF?<Qj"%ow£YS[;=!|i]GTjR_GqIpG'
-    
-    # URL-encode the password to handle special characters safely
-    encoded_password = urllib.parse.quote_plus(raw_password)
-    
-    # Create the connection string using pyodbc
-    connection_string = f"mssql+pyodbc://{username}:{encoded_password}@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server"
-    
     try:
-        engine = create_engine(connection_string)
+        engine = get_db_engine()
         
         # --- Check for existing table if overwrite is False ---
         if not overwrite:
